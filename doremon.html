@@ -16,25 +16,41 @@
       top: 0;
       left: 0;
       transition: transform 0.2s;
+      display: none; /* hidden by default */
     }
 
     .flipX {
-      transform: scaleX(-1); /* face left */
+      transform: scaleX(-1);
     }
 
     .flipY {
-      transform: scaleY(-1); /* face up */
+      transform: scaleY(-1);
+    }
+
+    .hint {
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      color: #333;
     }
   </style>
 </head>
 <body>
   <img id="doremon" src="d.gif" alt="Doraemon">
 
+  <div class="hint">
+    ▶ Press <b>S</b> to Show & Start | Press <b>H</b> to Hide & Stop
+  </div>
+
   <script>
     const doremon = document.getElementById("doremon");
     let x = 0, y = 0;
     let speed = 2;
-    let direction = "right"; // right → down → left → up
+    let direction = "right"; 
+    let animationId = null;
 
     function walk() {
       const maxX = window.innerWidth - doremon.offsetWidth;
@@ -42,44 +58,59 @@
 
       if (direction === "right") {
         x += speed;
-        if (x >= maxX) {
-          x = maxX;
-          direction = "down";
-        }
+        if (x >= maxX) { x = maxX; direction = "down"; }
         doremon.className = "";
       } 
       else if (direction === "down") {
         y += speed;
-        if (y >= maxY) {
-          y = maxY;
-          direction = "left";
-        }
-        doremon.className = "flipY"; // face down
+        if (y >= maxY) { y = maxY; direction = "left"; }
+        doremon.className = "flipY";
       } 
       else if (direction === "left") {
         x -= speed;
-        if (x <= 0) {
-          x = 0;
-          direction = "up";
-        }
-        doremon.className = "flipX"; // face left
+        if (x <= 0) { x = 0; direction = "up"; }
+        doremon.className = "flipX";
       } 
       else if (direction === "up") {
         y -= speed;
-        if (y <= 0) {
-          y = 0;
-          direction = "right";
-        }
-        doremon.className = ""; // face right again
+        if (y <= 0) { y = 0; direction = "right"; }
+        doremon.className = "";
       }
 
       doremon.style.left = x + "px";
       doremon.style.top = y + "px";
 
-      requestAnimationFrame(walk);
+      animationId = requestAnimationFrame(walk);
     }
 
-    walk();
+    function startWalking() {
+      doremon.style.display = "block";
+      if (!animationId) {
+        walk();
+      }
+    }
+
+    function stopWalking() {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+      doremon.style.display = "none";
+      x = 0; 
+      y = 0; 
+      doremon.style.left = "0px";
+      doremon.style.top = "0px";
+      doremon.className = "";
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener("keydown", (e) => {
+      if (e.key.toLowerCase() === "s") {
+        startWalking();
+      } else if (e.key.toLowerCase() === "h") {
+        stopWalking();
+      }
+    });
   </script>
 </body>
 </html>
